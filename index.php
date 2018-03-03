@@ -2,27 +2,33 @@
 
 $connect = mysqli_connect("localhost", "root", "", "netology");
 
-$user_filt = [];
-
 if (!empty($_POST)) {
 	if ($_POST['clear']) {
 		header('Location: index.php');
 	}
-	if ($_POST['name'] != '') {
-		$user_filt[0] = $_POST['name'];
-		$sql = 'select * from books where name like "%'.$user_filt[0].'%"';
-	}
-	if ($_POST['author'] != '') {
-		$user_filt[1] = $_POST['author'];
-		$sql = 'select * from books where author like "%'.$user_filt[1].'%"';	
-	}
-	if ($_POST['isbn'] != '') {
-		$user_filt[2] = $_POST['isbn'];
-		$sql = 'select * from books where isbn like "%'.$user_filt[2].'%"';	
+	
+	$k = 0;
+	$sql = "select * from books";
+	$user_str_filt = 'select * from books where ';
+
+	foreach ($_POST as $title => $value) {
+		if ($value === '' || $value === 'Отправить') {
+			continue;
+		} else {
+			$k++ ;
+			if ($k == 1) {
+				$sql = $user_str_filt.$title.' like "%'.$value.'%"';
+			}
+			if ($k > 1) {
+				$sql = $sql." AND ".$title.' like "%'.$value.'%"';
+			}
+		}
 	}
 } else {
 	$sql = "select * from books";
 }
+
+echo $sql;
 
 $res = mysqli_query($connect, $sql);
 
@@ -40,10 +46,10 @@ $res = mysqli_query($connect, $sql);
 		<table>
 			<tr>
 				<td>id</td>
-				<td>name<br><input type="text" name="name"></td>
-				<td>author<br><input type="text" name="author"></td>
+				<td>name<br><input type="text" name="name" value="<?= $_POST['name']; ?>"></td>
+				<td>author<br><input type="text" name="author" value="<?= $_POST['author']; ?>"></td>
 				<td>year</td>
-				<td>isbn<br><input type="text" name="isbn"></td>
+				<td>isbn<br><input type="text" name="isbn" value="<?= $_POST['isbn']; ?>"></td>
 				<td>genre</td>
 			</tr>
 			<?php while ($data = mysqli_fetch_array($res)) { ?>
